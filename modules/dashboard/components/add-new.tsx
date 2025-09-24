@@ -8,9 +8,31 @@ import Image from "next/image"
 import { useRouter } from "next/navigation";
 import { useState } from "react"
 import { toast } from "sonner";
+import TemplateSelectionModal from "./template-selecting-modal";
+import { createPlayground } from "../actions";
 
 const AddNewButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [selectedTemplate, setSelectedTemplate] = useState<{
+    title: string;
+    template: "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
+    description?: string;
+  } | null>(null)
+  const router = useRouter()
+
+  const handleSubmit = async (data:{
+    title: string;
+    template: "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
+    description?: string;
+  })=>{
+    setSelectedTemplate(data)
+
+    const res = await createPlayground(data);
+    toast.success("Playground created")
+  
+    setIsModalOpen(false)
+    router.push(`/playground/${res?.id}`)
+  }
 
   return (
     <>
@@ -20,7 +42,7 @@ const AddNewButton = () => {
         transition-all duration-300 ease-in-out
         hover:bg-background hover:border-[#E93F3F] hover:scale-[1.02]
         shadow-[0_2px_10px_rgba(0,0,0,0.08)]
-        hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
+        hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)] border border-black bg-gray-950"
       >
         <div className="flex flex-row justify-center items-start gap-4">
           <Button
@@ -48,6 +70,11 @@ const AddNewButton = () => {
       </div>
       
     {/* //   Todo Implement Template Selecting Model here */}
+    <TemplateSelectionModal
+      isOpen={isModalOpen}
+      onClose = {() => setIsModalOpen(false)}
+      onSubmit = {handleSubmit}
+    />
     </>
   )
 }
